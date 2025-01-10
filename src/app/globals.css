@@ -2,20 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+.scrollable-hidden {
+  overflow-y: auto;
+  scrollbar-width: none; /* for Firefox */
+  -ms-overflow-style: none; /* for Internet Explorer and Edge */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.scrollable-hidden::-webkit-scrollbar {
+  display: none; /* for Chrome, Safari, and Opera */
+}
+
+.truncate {
+      display: -webkit-box;
+      display: block;
+      max-width: 100%;
+      margin: 0 auto;
+      -webkit-line-clamp: 2; /* Number of lines to show */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+}
+
+.heart-pulse {
+  animation: pulse 1s infinite;
+}
+
+
+@font-face{
+  font-family: "High Tide Sans";
+  src: local('High Tide Sans'),
+  url("/src/assets/fonts/HighTide\ Sans.otf") format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face{
+  font-family: "High Tide";
+  src: local('High Tide'),
+  url("/src/assets/fonts/HighTide.otf") format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+.w-12:hover {
+  background-color: #ffffff;
+}
+
+.w-12:hover i {
+  color: #000000;
+}
+
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+h4 {
+  animation: marquee 10s linear infinite;
 }
