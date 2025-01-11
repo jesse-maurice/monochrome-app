@@ -37,13 +37,60 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
   //   }
   // }, [session]);
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = image.src;
-    link.download = "DownloadedImage.png"; // Dynamic naming is possible
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      // Get the original image URL (if it's a Next.js optimized image)
+      const originalSrc = image.src.includes("/_next/image")
+        ? new URL(image.src).searchParams.get("url") || image.src
+        : image.src;
+
+      // Decode the URL if it's encoded
+      const decodedSrc = decodeURIComponent(originalSrc);
+
+      // Fetch the image
+      const response = await fetch(decodedSrc);
+
+      if (!response.ok) throw new Error("Failed to fetch image");
+
+      const blob = await response.blob();
+
+      // Get the content type from the response
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+
+      // Determine file extension based on content type
+      const getExtension = (contentType: string) => {
+        switch (contentType) {
+          case "image/png":
+            return ".png";
+          case "image/jpeg":
+            return ".jpg";
+          case "image/webp":
+            return ".webp";
+          default:
+            return ".jpg";
+        }
+      };
+
+      // Create download link
+      const blobUrl = window.URL.createObjectURL(
+        new Blob([blob], { type: contentType })
+      );
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `image${getExtension(contentType)}`;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download image. Please try again.");
+    }
   };
 
   const openImageDetailsModal = () => {
@@ -92,7 +139,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                   className="px-4 py-3 text-[#000000] font-semibold flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
                 >
                   <FaBookmark className="text-xl" />
-                  <span className="hidden lg:inline-block font-jakarta">
+                  <span className="hidden lg:inline-block font-medium font-jakarta">
                     {isCollected ? "Collected" : "Collect"}
                   </span>
                 </button>
@@ -107,7 +154,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                         : "fa-regular fa-heart text-xl"
                     }
                   ></FaHeart>
-                  <span className="hidden lg:inline-block">
+                  <span className="hidden font-medium lg:inline-block">
                     {isLiked ? "Unlike" : "Like"}
                   </span>
                 </button>

@@ -9,6 +9,7 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 
+import LoginModal from './LoginModal';
 import SignUpModal from './SignUpModal';
 
 interface Props {
@@ -17,6 +18,18 @@ interface Props {
 
 const UserModal = ({ onClose }: Props) => {
   const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  // const [showSignUpModal, setShowSignUpModal] = useState(false);
+
+  const handleModalSwitch = (modalType: "signup" | "login") => {
+    if (modalType === "login") {
+      setShowSignUpModal(false);
+      setShowLoginModal(true);
+    } else {
+      setShowLoginModal(false);
+      setShowSignUpModal(true);
+    }
+  };
 
 
   return (
@@ -54,7 +67,18 @@ const UserModal = ({ onClose }: Props) => {
           </div>
         </div>
       </div>
-      {showSignUpModal && <SignUpModal onClose={() => setShowSignUpModal} />}
+      {showSignUpModal && (
+        <SignUpModal
+          onClose={() => setShowSignUpModal(false)}
+          onSwitchToLogin={() => handleModalSwitch("login")}
+        />
+      )}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToSignUp={() => handleModalSwitch("signup")}
+        />
+      )}
     </div>
   );
 }

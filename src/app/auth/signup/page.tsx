@@ -30,6 +30,7 @@ const SignUp = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [user, setUser] = useState<{
+    id?: string | null;
     name?: string | null;
     email?: string | null;
     image?: string | null;

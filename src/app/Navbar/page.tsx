@@ -22,11 +22,11 @@ import UserModal from '@components/UserModal';
 
 interface Props {
   user?: {
+    id?: string | null;
     name?: string | null;
     email?: string | null;
     image?: string | null;
   };
-  
 }
 
 const Navbar = ({ }: Props) => {
