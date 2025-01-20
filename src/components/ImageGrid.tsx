@@ -149,30 +149,30 @@ const ImageGrid = () => {
                   alt={`frame${index}`}
                   className="w-auto h-auto cursor-pointer rounded-xl
                   "
-                // loading="lazy"
+                  // loading="lazy"
                 />
                 <div className="absolute inset-0 transition-opacity duration-300 bg-black bg-opacity-0 hover:bg-opacity-10">
                   <div className="flex items-center w-full h-full gap-2 transition-opacity duration-300 opacity-0 hover:opacity-100">
                     <button
                       onClick={toggleBookmarkModal}
-                      className="px-4 py-3 absolute top-3 right-[78px] text-[#000000] bg-white font-semibold flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
+                      className="p-3 absolute top-3 right-[60px] text-[#ffffff] hover:bg-[#191919] hover:bg-opacity-50 font-semibold flex items-center justify-center gap-2 bg-transparent rounded-xl hover:border-[#bfbdbd]"
                     >
-                      <FaRegBookmark />
+                      <FaRegBookmark className="text-xl" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleLike(index);
                       }}
-                      className="px-4 py-3 text-[#000000] absolute top-3 right-5 bg-white font-semibold flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
+                      className="p-3 text-[#ffffff] absolute top-3 right-2 hover:bg-[#191919] hover:bg-opacity-50 font-semibold flex items-center justify-center gap-2 bg-transparent rounded-xl hover:border-[#bfbdbd]"
                     >
                       <FaHeart
                         className={
                           likes[index]
-                            ? "fa-solid fa-heart text-red-500 heart-pulse"
-                            : "fa-regular fa-heart"
+                            ? "fa-solid text-xl fa-heart text-red-500 heart-pulse"
+                            : "fa-regular fa-heart text-xl"
                         }
-                      ></FaHeart>
+                      />
                     </button>
 
                     <Link
@@ -182,7 +182,9 @@ const ImageGrid = () => {
                       className="flex items-center font-medium absolute bottom-5 right-5 max-sm:bg-transparent md:bg-[#ffffff] max-sm:text-[#ffffff] md:text-black md:rounded-lg md:py-3 md:px-3 md:hover:bg-[#ffffff] lg:bg-[#ef5350] lg:hover:bg-[#c85655] max-sm:hover:bg-[#ffffff]  max-sm:hover:text-black max-sm:hover:rounded-lg max-sm:hover:px-3 max-sm:hover:py-3 lg:py-2 lg:px-3 lg:rounded-xl content-center justify-center gap-2 lg:text-[#ffffff]"
                     >
                       <FaDownload />
-                      <span className="hidden font-jakarta lg:inline">Download</span>
+                      <span className="hidden font-jakarta lg:inline">
+                        Download
+                      </span>
                     </Link>
                   </div>
                 </div>
@@ -191,11 +193,13 @@ const ImageGrid = () => {
           </Masonry>
         </ResponsiveMasonry>
       )}
-      {selectedImage && <ImageModal image={selectedImage} onClose={closeModal} />}
+      {selectedImage && (
+        <ImageModal image={selectedImage} onClose={closeModal} />
+      )}
       {showBookmarkModal && (
-        <BookmarkModal 
-          isOpen={showBookmarkModal} 
-          onClose={() => setShowBookmarkModal(false)} 
+        <BookmarkModal
+          isOpen={showBookmarkModal}
+          onClose={() => setShowBookmarkModal(false)}
         />
       )}
     </div>

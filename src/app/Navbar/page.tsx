@@ -5,9 +5,13 @@ import React, {
   useState,
 } from 'react';
 
+import { signOut } from 'next-auth/react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   FaAngleDown,
+  FaBell,
   FaInstagram,
   FaLinkedinIn,
 } from 'react-icons/fa';
@@ -20,27 +24,33 @@ import UserModal from '@components/UserModal';
 
 // import { signOut } from "next-auth/react";
 
-interface Props {
-  user?: {
-    id?: string | null;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  };
+interface User {
+  id?: string | null;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 }
 
-const Navbar = ({ }: Props) => {
-  // const router = useRouter();
+interface Props {
+  user?: User | null;
+}
+
+const Navbar: React.FC<Props> = ({ user }) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  // const [filteredImages, setFilteredImages] = useState(imageList);
-  // const [selectedImage, setSelectedImage] = useState(null);
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    // If authentication fails, redirect to home
+    if (status === "unauthenticated") {
+      router.push("/");
+    }
+  }, [router]);
 
-  
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -67,44 +77,97 @@ const Navbar = ({ }: Props) => {
     setIsExploreOpen(!isExploreOpen);
   };
 
-  // const shuffleArray = (array) => {
-  //   for (let i = array.length - 1; i > 0; i--) {
-  //     const j = Math.floor(Math.random() * (i + 1));
-  //     [array[i], array[j]] = [array[j], array[i]];
-  //   }
-  //   return array;
-  // };
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
-  // useEffect(() => {
-  //   // Filter images based on searchValue
-  //   const filtered = imageList
-  //     .filter((image) =>
-  //       image.tag.some((tag) =>
-  //         tag.toLowerCase().includes(searchValue.toLowerCase())
-  //       )
-  //     )
-  //     .map((image) => ({
-  //       ...image,
-  //       src: images[image.src], // Update the src to the imported image
-  //     }));
-  //   setFilteredImages(shuffleArray(filtered));
-  // }, [searchValue]);
+  const renderUserActions = () => {
+    if (!user) {
+      return (
+        <button
+          className="flex items-center max-sm:hidden justify-center text-white tracking-wider px-[16px] outline-none border-none max-sm:py-[7px] font-semibold max-sm:px-[20px] max-sm:text-base md:text-lg 2xl:text-[16px] 2xl:leading-[20.8px] transition ease-in delay-150 hover:translate-y-1 hover:scale-40 duration-300 py-[10px] rounded-lg"
+          onClick={() => setShowUserModal(true)}
+        >
+          Join
+        </button>
+      );
+    }
 
-  // useEffect(() => {
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     setUser(user);
-  //   });
+    return (
+      <div className="flex items-center gap-4">
+        <Link href="/upload">
+          <button className="flex items-center justify-center text-white tracking-wider px-[16px] py-[10px] outline-none border-none font-semibold rounded-lg hover:bg-gray-700 transition-colors">
+            Upload
+          </button>
+        </Link>
 
-  //   return () => unsubscribe();
-  // }, []);
+        <div className="relative">
+          <button className="text-white hover:text-gray-300">
+            <FaBell size={20} />
+          </button>
+        </div>
 
-  // const handleLogout = async () => {
-  //   await signOut();
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("user");
-  //   router.push("/signup");
-  // };
+        <div
+          className="relative"
+          onMouseEnter={() => setIsUserDropdownOpen(true)}
+          onMouseLeave={() => setIsUserDropdownOpen(false)}
+        >
+          <div className="flex items-center gap-2 cursor-pointer">
+            <div className="w-10 h-10 rounded-full overflow-hidden">
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt="User avatar"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-600 flex items-center justify-center text-white">
+                  {user.name?.[0]?.toUpperCase() || "U"}
+                </div>
+              )}
+            </div>
+            <FaAngleDown className="text-white" />
+          </div>
 
+          {isUserDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+              <div className="py-2">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-semibold">{user.name}</p>
+                  <p className="text-xs text-gray-500">{user.email}</p>
+                </div>
+                <Link href="/profile">
+                  <span className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Profile
+                  </span>
+                </Link>
+                <Link href="/settings">
+                  <span className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    Settings
+                  </span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -169,9 +232,9 @@ const Navbar = ({ }: Props) => {
                 </div>
               )}
             </div>
-            <Link href="/upload">
+            <Link href="/store">
               <p className="text-[16px] font-semibold leading-[26px] text-white cursor-pointer max-sm:hidden md:inline-flex lg:inline-flex 2xl:inline-flex hover:text-gray-300">
-                Upload
+                Store
               </p>
             </Link>
 
@@ -236,13 +299,14 @@ const Navbar = ({ }: Props) => {
                 </div>
               )}
             </div>
-            <button
+            {renderUserActions()}
+            {/* <button
               className={` flex items-center max-sm:hidden justify-center text-white tracking-wider px-[16px] outline-none border-none max-sm:py-[7px] font-semibold max-sm:px-[20px] max-sm:text-base md:text-lg 2xl:text-[16px] 2xl:leading-[20.8px] transition ease-in delay-150 hover:translate-y-1 hover:scale-40 duration-300 py-[10px] rounded-lg`}
               type="button"
               onClick={() => setShowUserModal(true)}
             >
               Join
-            </button>
+            </button> */}
             <div className="max-sm:flex md:hidden lg:hidden 2xl:hidden items-center gap-1 justify-center">
               <div className=" w-1 h-1 bg-[#ffffff] rounded-full"></div>
               <p
@@ -391,6 +455,6 @@ const Navbar = ({ }: Props) => {
       {showUserModal && <UserModal onClose={() => setShowUserModal(false)} />}
     </>
   );
-}
+};
 
 export default Navbar

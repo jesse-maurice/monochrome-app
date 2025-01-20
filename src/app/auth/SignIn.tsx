@@ -1,35 +1,60 @@
 "use client";
-import React, { useState } from 'react'
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
-import loginImg from "../../../public/assets/images/signup image.webp";
+import React, {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  signIn,
+  useSession,
+} from 'next-auth/react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+import loginImg from '../../../public/assets/images/signup image.webp';
 
 // interface Props {}
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (session?.user) {
+      router.push("/");
+    }
+  }, [session, router]);
+
+  
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
-      
+
       if (result?.error) {
-        console.error(result.error);
+        setError("Invalid email or password");
       } else {
         router.push("/");
       }
     } catch (error) {
       console.error(error);
+      setError("An unexpected error occurred");
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/" });
   };
 
   return (
@@ -51,6 +76,11 @@ const SignIn = () => {
             <h2 className="py-4 text-4xl font-bold text-center font-high">
               MONOCHROME.
             </h2>
+            {error && (
+              <p className="p-3 mb-4 text-sm text-red-500 bg-red-100 rounded-lg">
+                {error}
+              </p>
+            )}
             <div className="flex flex-col mt-5 mb-4 font-semibold font-jakarta">
               <label>Email</label>
               <input
@@ -72,6 +102,7 @@ const SignIn = () => {
               />
               <button
                 type="submit"
+                onClick={handleGoogleSignIn}
                 className="w-full py-3 mt-8 bg-[#ef5350] font-semibold font-jakarta hover:bg-transparent hover:border-[3px] rounded-lg hover:border-[#ef5350] hover:text-[#ef5350] relative text-white"
               >
                 Log In

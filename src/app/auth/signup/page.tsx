@@ -29,7 +29,7 @@ import images from '../../../data/images.json';
 const SignUp = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [user, setUser] = useState<{
+  const [user] = useState<{
     id?: string | null;
     name?: string | null;
     email?: string | null;
@@ -45,9 +45,9 @@ const SignUp = () => {
 
   useEffect(() => {
     if (session?.user) {
-      setUser(session.user);
+      router.push("/");
     }
-  }, [session]);
+  }, [session, router]);
 
   useEffect(() => {
     // Function to switch to the next image index
@@ -58,7 +58,6 @@ const SignUp = () => {
     return () => clearInterval(interval); // Cleanup the interval
   }, [imageList.length]);
 
-  // Protect route
   // useEffect(() => {
   //   if (status === 'unauthenticated') {
   //     router.push('/signin');
@@ -71,40 +70,68 @@ const SignUp = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
 
-    // Basic email validation
+    // Validation
+    if (!email || !password || !firstName || !lastName) {
+      setError("All fields are required");
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address");
       return;
     }
 
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
     try {
-      const result = await signIn('credentials', {
+      // Register the user
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          name: `${firstName} ${lastName}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to register");
+      }
+
+      // If registration successful, sign in
+      const result = await signIn("credentials", {
         email,
         password,
-        firstName,
-        lastName,
         redirect: false,
       });
 
       if (result?.error) {
         setError(result.error);
       } else {
-        // Redirect on success
-        router.push('/');
+        router.push("/");
       }
-    } catch (error: Error | unknown) {
+    } catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.");
+      setError("An unexpected error occurred");
     }
   };
 
-  
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/" });
+  };
+
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: '/SignUp' });
+    await signOut({ redirect: true, callbackUrl: '/auth/signup' });
   };
 
 
@@ -167,10 +194,11 @@ const SignUp = () => {
             </li>
           </ul>
 
-          <div className="flex items-center justify-center w-full gap-4 mt-5">
+          <div className="flex items-center justify-center w-full gap-2 mt-5">
             <button
               type="button"
-              className="flex w-full items-center justify-center google text-base leading-[28px] -tracking-[0.2px] gap-2 font-semibold text-[#2c343e] border-[1px] border-gray-300 hover:border-gray-400 rounded-md py-1 hover:bg-gray-100"
+              onClick={handleGoogleSignIn}
+              className="flex w-full items-center justify-center google text-base leading-[28px] -tracking-[0.2px] gap-2 font-semibold text-[#2c343e] border-[1px] border-gray-300 hover:border-gray-400 rounded-lg py-2 hover:bg-gray-100"
             >
               {/* <Image 
                 width={36} 
@@ -179,14 +207,14 @@ const SignUp = () => {
                 alt="google icon"
                 className="w-9 h-9"
               /> */}
-              <FaGoogle className=" text-sm"/>
+              <FaGoogle className=" text-sm" />
               Join with Google
             </button>
             <button
-              className="apple px-3 py-[10px] border-[1px] border-gray-300 rounded-md hover:bg-[#000000]"
+              className="apple px-3 py-[12.5px] border-[1px] border-gray-300 rounded-lg hover:bg-[#000000]"
               type="button"
             >
-              <FaApple className="text-[#4a4a4a] hover:text-[#ffffff] "></FaApple>
+              <FaApple className="text-[#4a4a4a] text-xl hover:text-[#ffffff] "></FaApple>
             </button>
           </div>
           <div className="flex items-center justify-center w-full lg:my-4 2xl:my-7">
@@ -197,13 +225,17 @@ const SignUp = () => {
             <hr className="w-full border-gray-100"></hr>
           </div>
           <div className="w-full">
-            {/* Error Message */}
-            {error && <p className="text-center text-red-500">{error}</p>}
+            {error && (
+              <p className="p-3 mb-4 text-sm text-red-500 bg-red-100 rounded-lg">
+                {error}
+              </p>
+            )}
+            {/* {error && <p className="text-center text-red-500">{error}</p>} */}
             <form onSubmit={handleSignUp} noValidate>
               <div className="grid w-full grid-cols-2 gap-2 ">
                 <div className="">
                   <input
-                    className="relative w-full rounded-md pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                    className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                     type="text"
                     name="firstName"
                     autoComplete="off"
@@ -214,7 +246,7 @@ const SignUp = () => {
                 </div>
                 <div className="">
                   <input
-                    className="relative w-full rounded-md pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                    className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                     type="text"
                     name="lastName"
                     autoComplete="off"
@@ -226,7 +258,7 @@ const SignUp = () => {
               </div>
               <div className="my-3 ">
                 <input
-                  className="relative w-full rounded-md pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                  className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                   type=""
                   name=""
                   placeholder="Email"
@@ -236,7 +268,7 @@ const SignUp = () => {
               </div>
               <div>
                 <input
-                  className="relative w-full rounded-md pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                  className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                   type="password"
                   name="password"
                   id="password"
@@ -248,7 +280,7 @@ const SignUp = () => {
                 ></input>
               </div>
               <button
-                className="w-full py-[13px] 2xl:text-[16px] font-semibold 2xl:leading-[20.8px] lg:text-[15px] lg:leading-[19.5px] -tracking-[0.2px] hover:bg-white hover:text-[#000000] hover:border-[1px] hover:border-gray-500 mt-8 bg-black rounded-md text-[#ffffff]"
+                className="w-full py-[13px] 2xl:text-[16px] font-semibold 2xl:leading-[20.8px] lg:text-[15px] lg:leading-[19.5px] -tracking-[0.2px] hover:bg-white hover:text-[#000000] hover:border-[1px] hover:border-gray-500 mt-8 bg-black rounded-lg text-[#ffffff]"
                 type="button"
               >
                 Start sharing your content on Monochrome

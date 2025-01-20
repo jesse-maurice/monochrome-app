@@ -1,15 +1,15 @@
+"use client";
+
 import './globals.css';
 
 import React from 'react';
 
-import type { Metadata } from 'next';
+import { SessionProvider } from 'next-auth/react';
 import {
   DM_Sans,
   Plus_Jakarta_Sans,
 } from 'next/font/google';
 import High_Tide from 'next/font/local';
-
-import Provider from '@components/Provider';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -33,16 +33,12 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const metadata: Metadata = {
-  title: 'Monochrome App',
-  description: 'Site and store where you can buy and sell your monochrome art',
-};
 
 const RootLayout = ({ children }: Props) => {
   return (
     <html lang="en">
       <body className={`${jakarta.variable} ${sans.variable} ${high.variable}`}>
-        <Provider>{children}</Provider>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

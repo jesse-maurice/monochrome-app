@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import {
   FaBookmark,
@@ -23,10 +24,11 @@ interface ImageModalProps {
 }
 
 const ImageModal = ({ image, onClose }: ImageModalProps) => {
+  const { data: session, status } = useSession();
   const [isCollected, setIsCollected] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [user, setUser] = useState<string>("Anonymous");
+  // const [user, setUser] = useState<string>("Anonymous");
 
   if (!image) return null;
 
@@ -127,10 +129,33 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
         <div className="w-full px-4 py-5 m-auto bg-white shadow modal-container rounded-2xl max-sm:rounded-none max-sm:py-3 max-sm:px-0 lg:px-10">
           <div className="flex flex-col items-center justify-between py-3 md:w-full max-sm:py-0 md:flex-row max-sm:px-4 md:px-4">
             <div className="items-center hidden gap-3 mb-4 md:w-1/2 lg:inline-flex md:mb-0">
-              <div className="w-12 h-12 rounded-full ">
-                <FaUser className="text-3xl" />
-              </div>
-              <p className="text-lg font-jakarta font-medium ">{user}</p>
+              {status === "authenticated" && session.user ? (
+                <div className="flex items-center gap-3">
+                  {session.user.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      width={48}
+                      height={48}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                      <FaUser className="text-gray-600 text-xl" />
+                    </div>
+                  )}
+                  <p className="text-lg font-jakarta font-medium">
+                    {session.user.name || "User"}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                    <FaUser className="text-gray-600 text-xl" />
+                  </div>
+                  <p className="text-lg font-jakarta font-medium">Anonymous</p>
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-between lg:w-1/2 max-sm:w-full md:w-full">
               <div className="flex items-center justify-center gap-2">
@@ -196,7 +221,9 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                   className="fa-solid fa-circle-info"
                   style={{ color: "#5c5c5c" }}
                 ></FaCircleInfo>
-                <span className="hidden font-jakarta md:inline-block">More info</span>
+                <span className="hidden font-jakarta md:inline-block">
+                  More info
+                </span>
               </button>
               <button className="px-4 py-2 text-[#000000] flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]">
                 <FaUpRightFromSquare
