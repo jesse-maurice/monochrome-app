@@ -142,13 +142,6 @@ const SignUpModal = ({ onClose, onSwitchToLogin }: Props) => {
                 type="button"
                 className="flex w-full items-center justify-center google text-[17px] leading-[27.2px] -tracking-[0.5px] gap-2 font-medium text-[#2c343e] border-[1px] border-gray-300 hover:border-gray-400 rounded-xl py-2 hover:bg-gray-100"
               >
-                {/* <Image 
-                width={36} 
-                height={36} 
-                src={googleIcon} 
-                alt="google icon"
-                className="w-9 h-9"
-              /> */}
                 <FaGoogle className=" text-sm" />
                 Join with Google
               </button>

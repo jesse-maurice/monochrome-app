@@ -7,7 +7,6 @@ import React, {
 
 import {
   signIn,
-  signOut,
   useSession,
 } from 'next-auth/react';
 import Link from 'next/link';
@@ -29,19 +28,21 @@ import images from '../../../data/images.json';
 const SignUp = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [user] = useState<{
-    id?: string | null;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-  } | null>(null);
+  // const [user] = useState<{
+  //   id?: string | null;
+  //   name?: string | null;
+  //   email?: string | null;
+  //   image?: string | null;
+  // } | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const imageList = images;
+  
 
   useEffect(() => {
     if (session?.user) {
@@ -71,29 +72,36 @@ const SignUp = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    // Validation
+    // Basic validation remains the same
     if (!email || !password || !firstName || !lastName) {
       setError("All fields are required");
+      setIsLoading(false);
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address");
+      setIsLoading(false);
       return;
     }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters long");
+      setIsLoading(false);
       return;
     }
 
     try {
-      // Register the user
+      // Register the user - Note the full URL path
       const response = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
           email,
           password,
@@ -117,11 +125,15 @@ const SignUp = () => {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/");
+        router.push("/"); // Redirect to homepage after successful signup
       }
-    } catch (error) {
-      console.error(error);
-      setError("An unexpected error occurred");
+    } catch (error: unknown) {
+      console.error("Registration error:", error);
+      setError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -129,52 +141,44 @@ const SignUp = () => {
     signIn("google", { callbackUrl: "/" });
   };
 
-
-  const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: '/auth/signup' });
-  };
-
-
+  // const handleLogout = async () => {
+  //   await signOut({ redirect: true, callbackUrl: '/auth/signup' });
+  // };
 
   return (
     <div className="flex flex-col w-full h-full font-jakarta">
-      <header className="z-10 flex flex-row bg-white items-center sticky top-0 border-b-[1px] border-b-gray-100 content-center justify-between w-full pt-1 pb-2 border-box px-44 max-sm:px-4 md:px-10 lg:px-10 xl:px-10 2xl:px-44">
+      <header className="z-10 flex flex-row bg-white items-center sticky top-0 border-b-[1px] border-b-gray-100 content-center justify-between w-full pt-1 pb-2 border-box px-44 max-sm:px-4 md:px-10 lg:px-10 xl:px-10 2xl:px-20">
         <Link href="/">
           <h1 className="font-high text-[50px] max-sm:text-[40px] text-[#000000]">
             m
           </h1>
         </Link>
-
-        <Link href={user ? "/" : "/SignUp"}>
-          <button
-            className={`bg-[#ef5350] flex items-center justify-center text-white px-[16px] font-jakarta font-semibold outline-none border-none max-sm:py-[7px] max-sm:px-[20px] max-sm:text-base md:text-[15px] leading-[19.5px] -tracking-[0.2px] transition ease-in delay-150 hover:translate-y-1 hover:scale-40 hover:bg-[#ef5350] duration-300 py-[10px] rounded-lg`}
-            type="submit"
-            onClick={user ? handleLogout : undefined}
-          >
-            {user ? "Sign Out" : "Login"}
+        <Link href="/signin">
+          <button className="bg-[#ef5350] flex items-center justify-center text-white px-[16px] font-jakarta font-semibold outline-none border-none max-sm:py-[7px] max-sm:px-[20px] max-sm:text-base md:text-[15px] leading-[19.5px] -tracking-[0.2px] transition ease-in delay-150 hover:translate-y-1 hover:scale-40 hover:bg-[#ef5350] duration-300 py-[10px] rounded-lg">
+            Login
           </button>
         </Link>
       </header>
-      <main className="grid w-full grid-cols-2 gap-10 mt-8 lg:mt-5 px-44 max-sm:px-4 md:px-10 lg:px-10 xl:px-10 2xl:px-0 max-w-[1441px] mx-auto">
+      <main className="grid w-full grid-cols-2 gap-10 mt-8 lg:mt-12 px-44 max-sm:px-4 md:px-10 lg:px-10 xl:px-10 2xl:px-20 mx-auto">
         <div className=" main-description">
-          <h1 className=" font-semibold text-[#2c343e] lg:text-[27px] 2xl:text-[30px] leading-[40px] lg:-tracking-[0.5px] 2xl:-tracking-[0.7px]">
+          <h1 className=" font-medium text-[#2c343e] lg:text-[27px] 2xl:text-[30px] leading-[40px] lg:-tracking-[0.5px] 2xl:-tracking-[0.7px]">
             Afrocentric stock imagery to fuel your business initiatives and
             ignite artistic innovation.
           </h1>
-          <p className=" 2xl:text-[23px] mt-3 mb-4 text-[#2c343e] font-semibold 2xl:leading-[36px] 2xl:-tracking-[0.3px] lg:text-[19px] lg:leading-[30px] lg:-tracking-[0.4px]">
+          <p className=" 2xl:text-[20px] mt-3 mb-4 text-[#2c343e] font-medium 2xl:leading-[36px] 2xl:-tracking-[0.3px] lg:text-[17px] lg:leading-[30px] lg:-tracking-[0.4px]">
             Upload your photos and videos to one of the internet&apos;s most
             expansive repositories of visual content, free of charge.
           </p>
           <ul className=" 2xl:text-[18px] font-semibold 2xl:leading-[28px] lg:text-[15px] lg:leading-[26px] text-[#7f7f7f]">
             <li className="flex items-center gap-2">
-              <FaCheck className="text-xl" style={{ color: "#ef5350" }} />
+              <FaCheck className="text-base" style={{ color: "#ef5350" }} />
               <p>
                 <span>Reach a global audience of more than</span>
                 <span className="text-[#4a4a4a] font-bold"> 30 million</span>
               </p>
             </li>
             <li className="flex items-center gap-2 my-1">
-              <FaCheck className="text-xl" style={{ color: "#ef5350" }} />
+              <FaCheck className="text-base" style={{ color: "#ef5350" }} />
               <p>
                 <span className=" text-[#4a4a4a] font-bold">
                   Help creative people all over the world
@@ -183,7 +187,7 @@ const SignUp = () => {
               </p>
             </li>
             <li className="flex items-center gap-2">
-              <FaCheck className="text-xl" style={{ color: "#ef5350" }} />
+              <FaCheck className="text-base" style={{ color: "#ef5350" }} />
               <p>
                 <span>Join more than 320K</span>
                 <span className=" text-[#4a4a4a] font-bold">
@@ -235,7 +239,7 @@ const SignUp = () => {
               <div className="grid w-full grid-cols-2 gap-2 ">
                 <div className="">
                   <input
-                    className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                    className="relative w-full rounded-lg pl-5 py-2 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                     type="text"
                     name="firstName"
                     autoComplete="off"
@@ -246,7 +250,7 @@ const SignUp = () => {
                 </div>
                 <div className="">
                   <input
-                    className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                    className="relative w-full rounded-lg pl-5 py-2 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                     type="text"
                     name="lastName"
                     autoComplete="off"
@@ -256,9 +260,9 @@ const SignUp = () => {
                   ></input>
                 </div>
               </div>
-              <div className="my-3 ">
+              <div className="my-5 ">
                 <input
-                  className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                  className="relative w-full rounded-lg pl-5 py-2 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                   type=""
                   name=""
                   placeholder="Email"
@@ -268,7 +272,7 @@ const SignUp = () => {
               </div>
               <div>
                 <input
-                  className="relative w-full rounded-lg pl-5 py-3 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
+                  className="relative w-full rounded-lg pl-5 py-2 text-[18px] leading-[28px] border-[1px] font-normal text-[#7f7f7f] border-gray-300 outline-none"
                   type="password"
                   name="password"
                   id="password"
@@ -280,10 +284,13 @@ const SignUp = () => {
                 ></input>
               </div>
               <button
-                className="w-full py-[13px] 2xl:text-[16px] font-semibold 2xl:leading-[20.8px] lg:text-[15px] lg:leading-[19.5px] -tracking-[0.2px] hover:bg-white hover:text-[#000000] hover:border-[1px] hover:border-gray-500 mt-8 bg-black rounded-lg text-[#ffffff]"
-                type="button"
+                className="w-full py-[13px] 2xl:text-[16px] font-semibold 2xl:leading-[20.8px] lg:text-[15px] lg:leading-[19.5px] -tracking-[0.2px] hover:bg-opacity-70 mt-8 bg-black rounded-xl text-[#ffffff]"
+                type="submit"
+                disabled={isLoading}
               >
-                Start sharing your content on Monochrome
+                {isLoading
+                  ? "Creating account..."
+                  : "Start sharing your content on Monochrome"}
               </button>
             </form>
           </div>
@@ -310,6 +317,6 @@ const SignUp = () => {
       </main>
     </div>
   );
-}
+};
 
 export default SignUp

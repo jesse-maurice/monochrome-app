@@ -108,7 +108,7 @@ const Navbar: React.FC<Props> = ({ user }) => {
           </button>
         </Link>
 
-        <div className="relative">
+        <div className="relative mr-2">
           <button className="text-white hover:text-gray-300">
             <FaBell size={20} />
           </button>
@@ -120,13 +120,13 @@ const Navbar: React.FC<Props> = ({ user }) => {
           onMouseLeave={() => setIsUserDropdownOpen(false)}
         >
           <div className="flex items-center gap-2 cursor-pointer">
-            <div className="w-10 h-10 rounded-full overflow-hidden">
+            <div className="w-12 h-12 rounded-full hover:border-2 hover:border-white hover:border-opacity-70 overflow-hidden">
               {user.image ? (
                 <Image
                   src={user.image}
                   alt="User avatar"
-                  width={40}
-                  height={40}
+                  width={100}
+                  height={100}
                   className="object-cover"
                 />
               ) : (
@@ -135,29 +135,29 @@ const Navbar: React.FC<Props> = ({ user }) => {
                 </div>
               )}
             </div>
-            <FaAngleDown className="text-white" />
           </div>
 
           {isUserDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50">
+            <div className="absolute font-jakarta text-sm font-semibold right-0 mt-4 w-40 bg-white rounded-lg shadow-lg z-50">
               <div className="py-2">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-sm font-semibold">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
-                </div>
                 <Link href="/profile">
-                  <span className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Profile
+                  <span className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    Your Profile
+                  </span>
+                </Link>
+                <Link href="/collections">
+                  <span className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                    Your Collections
                   </span>
                 </Link>
                 <Link href="/settings">
-                  <span className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <span className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                     Settings
                   </span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                 >
                   Sign out
                 </button>
@@ -180,7 +180,7 @@ const Navbar: React.FC<Props> = ({ user }) => {
           <h1 className="flex font-high items-center justify-center pt-2 text-[50px] max-sm:text-[40px] text-[#ffffff]">
             m
           </h1>
-          <div className="flex items-center font-jakarta lg:gap-8 2xl:gap-8 max-sm:gap-3 md:gap-4">
+          <div className="flex items-center font-jakarta lg:gap-8 2xl:gap-10 max-sm:gap-3 md:gap-4">
             <div
               className="relative flex items-center gap-2 max-sm:hidden md:inline-flex lg:inline-flex 2xl:inline-flex"
               onClick={toggleExploreDropdown}
@@ -232,7 +232,9 @@ const Navbar: React.FC<Props> = ({ user }) => {
                 </div>
               )}
             </div>
-            <Link href="/store">
+            <Link
+              target="_blank"
+              href="https://mainstack.store/monochrome">
               <p className="text-[16px] font-semibold leading-[26px] text-white cursor-pointer max-sm:hidden md:inline-flex lg:inline-flex 2xl:inline-flex hover:text-gray-300">
                 Store
               </p>

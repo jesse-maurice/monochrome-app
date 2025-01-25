@@ -1,8 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
-import { useSession } from 'next-auth/react';
+import {
+  signIn,
+  useSession,
+} from 'next-auth/react';
 import Image from 'next/image';
 import {
   FaBookmark,
@@ -28,38 +34,46 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
   const [isCollected, setIsCollected] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  // const [user, setUser] = useState<string>("Anonymous");
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [imageOrientation, setImageOrientation] = useState<
+    "portrait" | "landscape"
+  >("portrait");
+
+  useEffect(() => {
+    const loadImage = async () => {
+      const img = await new Promise<HTMLImageElement>((resolve) => {
+        const imgElement = document.createElement("img");
+        imgElement.onload = () => resolve(imgElement);
+        imgElement.src = image.src;
+      });
+
+      setImageOrientation(img.width > img.height ? "landscape" : "portrait");
+    };
+
+    loadImage();
+  }, [image.src]);
 
   if (!image) return null;
 
-  // Later you can update it after auth:
-  // useEffect(() => {
-  //   if (session?.user?.name) {
-  //     setUser(session.user.name);
-  //   }
-  // }, [session]);
-
   const handleDownload = async () => {
+    if (status !== "authenticated") {
+      setShowSignUpModal(true);
+      return;
+    }
+
     try {
-      // Get the original image URL (if it's a Next.js optimized image)
       const originalSrc = image.src.includes("/_next/image")
         ? new URL(image.src).searchParams.get("url") || image.src
         : image.src;
 
-      // Decode the URL if it's encoded
       const decodedSrc = decodeURIComponent(originalSrc);
-
-      // Fetch the image
       const response = await fetch(decodedSrc);
 
       if (!response.ok) throw new Error("Failed to fetch image");
 
       const blob = await response.blob();
-
-      // Get the content type from the response
       const contentType = response.headers.get("content-type") || "image/jpeg";
 
-      // Determine file extension based on content type
       const getExtension = (contentType: string) => {
         switch (contentType) {
           case "image/png":
@@ -73,7 +87,6 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
         }
       };
 
-      // Create download link
       const blobUrl = window.URL.createObjectURL(
         new Blob([blob], { type: contentType })
       );
@@ -82,11 +95,9 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
       link.href = blobUrl;
       link.download = `image${getExtension(contentType)}`;
 
-      // Trigger download
       document.body.appendChild(link);
       link.click();
 
-      // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
@@ -95,26 +106,25 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
     }
   };
 
+  const handleSignIn = () => {
+    signIn();
+    setShowSignUpModal(false);
+  };
+
   const openImageDetailsModal = () => {
-    //  setSelectedImageDetails(image); // Set the image for details modal
-    setShowDetailsModal(true); // Open the PhotoDetailsModal
+    setShowDetailsModal(true);
   };
 
   const closeImageDetailsModal = () => {
     setShowDetailsModal(false);
   };
 
-  // Handle collection toggle
   const handleCollection = () => {
     setIsCollected(!isCollected);
-    // Additional logic for when an item is collected or uncollected
   };
 
-  // Handle likes increment
   const handleLikes = () => {
-    // setLikes((prevLikes) => prevLikes + 1);
-    setIsLiked(!isLiked); // Correctly increment likes
-    // Additional logic for when an item is liked
+    setIsLiked(!isLiked);
   };
 
   return (
@@ -130,7 +140,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
           <div className="flex flex-col items-center justify-between py-3 md:w-full max-sm:py-0 md:flex-row max-sm:px-4 md:px-4">
             <div className="items-center hidden gap-3 mb-4 md:w-1/2 lg:inline-flex md:mb-0">
               {status === "authenticated" && session.user ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 border-2 border-red-600">
                   {session.user.image ? (
                     <Image
                       src={session.user.image}
@@ -153,7 +163,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                   <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
                     <FaUser className="text-gray-600 text-xl" />
                   </div>
-                  <p className="text-lg font-jakarta font-medium">Anonymous</p>
+                  <p className="text-lg font-jakarta font-medium"></p>
                 </div>
               )}
             </div>
@@ -193,14 +203,22 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
               </button>
             </div>
           </div>
-          <div className="flex items-center justify-center w-full max-w-2xl p-4 mx-auto">
-            <div className="w-full h-full">
+          <div className="flex w-full max-w-4xl p-4 mx-auto">
+            <div className="w-full flex items-center justify-center">
               <Image
-                width={100}
-                height={100}
+                width={imageOrientation === "landscape" ? 1000 : 482}
+                height={imageOrientation === "landscape" ? 600 : 722}
                 src={image.src}
                 alt="Modal"
-                className="w-full h-full rounded-xl"
+                className={`rounded-xl 
+                  ${
+                    imageOrientation === "landscape"
+                      ? "w-full h-auto"
+                      : "w-[482px] h-[722px] max-sm:w-full max-sm:h-auto"
+                  }`}
+                style={{
+                  objectFit: "cover",
+                }}
               />
             </div>
           </div>
@@ -242,8 +260,33 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
       {showDetailsModal && (
         <PhotoDetailsModal image={image} onClose={closeImageDetailsModal} />
       )}
+
+      {showSignUpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
+            <h2 className="text-2xl font-bold mb-4">Sign Up to Download</h2>
+            <p className="mb-6">
+              Create an account to unlock free image downloads.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowSignUpModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignIn}
+                className="px-4 py-2 bg-[#ef5350] text-white rounded-lg hover:bg-[#de3e3b]"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
-export default ImageModal
+export default ImageModal;
