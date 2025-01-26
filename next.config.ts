@@ -3,7 +3,10 @@ import { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["localhost", "your-production-domain.com"],
+    domains: [
+      "localhost",
+      "res.cloudinary.com"
+    ],
     unoptimized: process.env.NODE_ENV === "development",
   },
   api: {
