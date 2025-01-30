@@ -1,15 +1,25 @@
-"use client";
-
 import './globals.css';
 
 import React from 'react';
 
-import { SessionProvider } from 'next-auth/react';
+import type { Metadata } from 'next';
 import {
   DM_Sans,
   Plus_Jakarta_Sans,
 } from 'next/font/google';
 import High_Tide from 'next/font/local';
+
+import SessionProviderWrapper from '../components/SessionProviderWrapper';
+
+export const metadata: Metadata = {
+  title: "Monochrome",
+  description:
+    "Discover and showcase breathtaking monochrome photography. Join a community of black and white photography enthusiasts, upload your images, and explore a curated collection of artistic visuals.",
+  icons: {
+    icon: "/favicon.png", // Path to your PNG file in the public folder
+  },
+};
+
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -38,7 +48,7 @@ const RootLayout = ({ children }: Props) => {
   return (
     <html lang="en">
       <body className={`${jakarta.variable} ${sans.variable} ${high.variable}`}>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProviderWrapper>{children}</SessionProviderWrapper>
       </body>
     </html>
   );
