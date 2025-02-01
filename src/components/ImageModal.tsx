@@ -5,10 +5,7 @@ import {
   useState,
 } from 'react';
 
-import {
-  signIn,
-  useSession,
-} from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import {
   FaBookmark,
@@ -20,7 +17,9 @@ import {
   FaXmark,
 } from 'react-icons/fa6';
 
+import LoginModal from './LoginModal';
 import PhotoDetailsModal from './PhotoDetailsModal';
+import SignUpModal from './SignUpModal';
 
 interface ImageModalProps {
   image: {
@@ -35,9 +34,20 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [imageOrientation, setImageOrientation] = useState<
     "portrait" | "landscape"
-  >("portrait");
+    >("portrait");
+  
+  const handleModalSwitch = (modalType: "signup" | "login") => {
+    if (modalType === "login") {
+      setShowSignUpModal(false);
+      setShowLoginModal(true);
+    } else {
+      setShowLoginModal(false);
+      setShowSignUpModal(true);
+    }
+  };
 
   useEffect(() => {
     const loadImage = async () => {
@@ -106,11 +116,6 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
     }
   };
 
-  const handleSignIn = () => {
-    signIn();
-    setShowSignUpModal(false);
-  };
-
   const openImageDetailsModal = () => {
     setShowDetailsModal(true);
   };
@@ -140,7 +145,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
           <div className="flex flex-col items-center justify-between py-3 md:w-full max-sm:py-0 md:flex-row max-sm:px-4 md:px-4">
             <div className="items-center hidden gap-3 mb-4 md:w-1/2 lg:inline-flex md:mb-0">
               {status === "authenticated" && session.user ? (
-                <div className="flex items-center gap-3 border-2 border-red-600">
+                <div className="flex items-center gap-3">
                   {session.user.image ? (
                     <Image
                       src={session.user.image}
@@ -171,7 +176,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={handleCollection}
-                  className="px-4 py-3 text-[#000000] font-semibold flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
+                  className="px-4 py-3 text-[#000000] font-semibold flex items-center justify-center gap-2 bg-transparent rounded-xl border-[1px] hover:border-[#191919] hover:bg-gray-100"
                 >
                   <FaBookmark className="text-xl" />
                   <span className="hidden lg:inline-block font-medium font-jakarta">
@@ -180,7 +185,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                 </button>
                 <button
                   onClick={handleLikes}
-                  className="px-4 py-3 text-[#000000] font-jakarta font-semibold flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
+                  className="px-4 py-3 text-[#000000] font-jakarta font-semibold flex items-center justify-center gap-2 bg-transparent rounded-xl border-[1px] hover:border-[#191919] hover:bg-gray-100"
                 >
                   <FaHeart
                     className={
@@ -197,7 +202,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
 
               <button
                 onClick={handleDownload}
-                className="px-4 py-3 text-white font-jakarta bg-[#ef5350] rounded-lg hover:bg-[#de3e3b] ease-in-out duration-150 transition-shadow"
+                className="px-4 py-3 text-white font-jakarta bg-[#ef5350] rounded-xl hover:bg-[#de3e3b] ease-in-out duration-150 transition-shadow"
               >
                 Free Download
               </button>
@@ -233,7 +238,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
             <div className="flex items-center justify-end w-full gap-2 py-8 max-sm:py-1">
               <button
                 onClick={openImageDetailsModal}
-                className="px-4 py-2 text-[#000000] flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]"
+                className="px-4 py-3 text-[#000000] flex items-center justify-center gap-2 bg-transparent rounded-xl border-[1px] hover:border-[#191919] hover:bg-gray-100"
               >
                 <FaCircleInfo
                   className="fa-solid fa-circle-info"
@@ -243,7 +248,7 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
                   More info
                 </span>
               </button>
-              <button className="px-4 py-2 text-[#000000] flex items-center justify-center gap-2 bg-transparent rounded-lg border-[1px] hover:border-[#bfbdbd]">
+              <button className="px-4 py-3 text-[#000000] flex items-center justify-center gap-2 bg-transparent rounded-xl border-[1px] hover:border-[#191919] hover:bg-gray-100">
                 <FaUpRightFromSquare
                   className="fa-solid fa-up-right-from-square"
                   style={{ color: "#5c5c5c" }}
@@ -262,28 +267,16 @@ const ImageModal = ({ image, onClose }: ImageModalProps) => {
       )}
 
       {showSignUpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-            <h2 className="text-2xl font-bold mb-4">Sign Up to Download</h2>
-            <p className="mb-6">
-              Create an account to unlock free image downloads.
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => setShowSignUpModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSignIn}
-                className="px-4 py-2 bg-[#ef5350] text-white rounded-lg hover:bg-[#de3e3b]"
-              >
-                Sign In
-              </button>
-            </div>
-          </div>
-        </div>
+        <SignUpModal
+          onClose={() => setShowSignUpModal(false)}
+          onSwitchToLogin={() => handleModalSwitch("login")}
+        />
+      )}
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSwitchToSignUp={() => handleModalSwitch("signup")}
+        />
       )}
     </div>
   );

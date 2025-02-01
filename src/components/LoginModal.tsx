@@ -104,7 +104,7 @@ const LoginModal = ({ onClose, onSwitchToSignUp }: Props) => {
 
 
   return (
-    <div className="fixed inset-0 z-50 font-jakarta bg-black bg-opacity-5 flex justify-center items-center overflow-hidden">
+    <div className="fixed inset-0 z-50 font-jakarta bg-black bg-opacity-80 flex justify-center items-center overflow-hidden">
       <div
         className={`scrollable-hidden w-auto h-auto rounded-lg transform transition-transform duration-300 ease-in-out
           ${

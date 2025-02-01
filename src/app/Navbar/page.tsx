@@ -17,6 +17,7 @@ import {
 } from 'react-icons/fa';
 import {
   FaEllipsis,
+  FaXmark,
   FaXTwitter,
 } from 'react-icons/fa6';
 
@@ -232,9 +233,7 @@ const Navbar: React.FC<Props> = ({ user }) => {
                 </div>
               )}
             </div>
-            <Link
-              target="_blank"
-              href="https://mainstack.store/monochrome">
+            <Link target="_blank" href="https://mainstack.store/monochrome">
               <p className="text-[16px] font-semibold leading-[26px] text-white cursor-pointer max-sm:hidden md:inline-flex lg:inline-flex 2xl:inline-flex hover:text-gray-300">
                 Store
               </p>
@@ -309,6 +308,7 @@ const Navbar: React.FC<Props> = ({ user }) => {
             >
               Join
             </button> */}
+
             <div className="max-sm:flex md:hidden lg:hidden 2xl:hidden items-center gap-1 justify-center">
               <div className=" w-1 h-1 bg-[#ffffff] rounded-full"></div>
               <p
@@ -347,7 +347,7 @@ const Navbar: React.FC<Props> = ({ user }) => {
                     </form>
                   </div>
                   <div className=" w-full h-[0.2px] mt-3 bg-gray-700"></div>
-                  <ul className="flex flex-col items-start text-xl font-semibold text-white font-jakarta ">
+                  <ul className="flex flex-col items-start text-lg font-semibold text-white font-jakarta ">
                     <li className="py-2 mt-4 hover:text-gray-300">
                       <Link href="/">Home</Link>
                     </li>
@@ -397,27 +397,21 @@ const Navbar: React.FC<Props> = ({ user }) => {
                       href="https://twitter.com/i_am_monochrome"
                       rel="noreferrer"
                     >
-                      <i
-                        className="fa-brands fa-x-twitter fa-2xl"
-                        style={{ color: "#ffffff" }}
-                      ></i>
+                      <FaXTwitter className="text-white transition-colors duration-1000  text-2xl" />
                     </Link>
                     <Link
                       target="_blank"
                       href="https://www.instagram.com/i.am.monochrome/"
                       rel="noreferrer"
                     >
-                      <i
-                        className="fa-brands fa-instagram fa-2xl"
-                        style={{ color: "#ffffff" }}
-                      ></i>
+                      <FaInstagram className="text-white text-2xl transition-colors duration-1000" />
                     </Link>
                   </div>
                   <button
                     className="absolute p-4 right-1 top-4 md:top-6"
                     onClick={toggleNavMenu}
                   >
-                    <i className="text-white fas fa-times fa-xl"></i>
+                    <FaXmark className="text-white text-xl" />
                   </button>
                 </nav>
               </div>
