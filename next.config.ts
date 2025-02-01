@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       "localhost",
-      "res.cloudinary.com"
+      "res.cloudinary.com",
+      "lh3.googleusercontent.com",
+      "googleusercontent.com",
     ],
     unoptimized: process.env.NODE_ENV === "development",
   },

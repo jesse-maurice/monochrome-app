@@ -59,10 +59,14 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        console.log("JWT user:", user);
         token.id = user.id;
         token.email = user.email;
-        token.image = user.image?.replace("http://", "https://");
+        // Only modify if it starts with http://
+        if (user.image?.startsWith("http://")) {
+          token.image = user.image.replace("http://", "https://");
+        } else {
+          token.image = user.image;
+        }
       }
       return token;
     },
