@@ -62,6 +62,7 @@ export const authOptions: NextAuthOptions = {
         console.log("JWT user:", user);
         token.id = user.id;
         token.email = user.email;
+        token.image = user.image?.replace("http://", "https://");
       }
       return token;
     },
@@ -69,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         console.log("Session user:", session.user);
         session.user.id = token.id as string;
+        session.user.image = token.image as string; 
       }
       return session;
     },
